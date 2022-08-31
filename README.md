@@ -1,3 +1,3 @@
-# My Game is Cool!
+# Flappy Camper
 
-Make sure you give it a good description here...
+Add better stuff later.

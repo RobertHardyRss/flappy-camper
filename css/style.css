@@ -18,3 +18,34 @@ body {
 	height: 600px;
 	border: solid 1px black;
 }
+
+@keyframes rainbow {
+	0% {
+		color: red;
+	}
+	14% {
+		color: orange;
+	}
+	28% {
+		color: yellow;
+	}
+	42% {
+		color: green;
+	}
+	56% {
+		color: blue;
+	}
+	70% {
+		color: indigo;
+	}
+	100% {
+		color: violet;
+	}
+}
+
+h1 {
+	color: purple;
+	font-size: 30pt;
+	animation: rainbow 5s infinite alternate-reverse;
+	font-family: Arial, Helvetica, sans-serif;
+}
