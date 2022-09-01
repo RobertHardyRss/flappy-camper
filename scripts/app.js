@@ -3,12 +3,13 @@
 //@ts-ignore
 const canvas = document.getElementById("game-canvas");
 const ctx = canvas.getContext("2d");
-if (ctx == null) throw "ctx is undefined!";
+if (!ctx) throw "ctx is null or undefined!";
 
 canvas.width = 800;
 canvas.height = 600;
 
 const MAX_TOP_OBSTACLE_HEIGHT = 200;
+const TOP_OBSTACLE_WIDTH = 10;
 let gameSpeed = 10;
 
 class Obstacle {
@@ -19,7 +20,7 @@ class Obstacle {
 	constructor(h, ctx) {
 		this.ctx = ctx;
 		this.h = h;
-		this.w = 10;
+		this.w = TOP_OBSTACLE_WIDTH;
 
 		this.x = canvas.width;
 		this.y = 0;
@@ -28,7 +29,7 @@ class Obstacle {
 	}
 
 	update() {
-		this.x = this.x - gameSpeed * -1;
+		this.x = this.x - gameSpeed;
 	}
 
 	draw() {
@@ -37,14 +38,45 @@ class Obstacle {
 	}
 }
 
-let o = new Obstacle(MAX_TOP_OBSTACLE_HEIGHT, ctx);
+class ObstacleManager {
+	constructor(ctx) {
+		this.ctx = ctx;
+		this.topObstacles = [];
+	}
+
+	init() {
+		let minTopObs = canvas.width / TOP_OBSTACLE_WIDTH + 2;
+		let currentX = 0;
+		while (this.topObstacles.length < minTopObs) {
+			let o = new Obstacle(MAX_TOP_OBSTACLE_HEIGHT, this.ctx);
+			o.x = currentX;
+			this.topObstacles.push(o);
+			currentX += TOP_OBSTACLE_WIDTH;
+		}
+	}
+
+	update() {
+		this.topObstacles.forEach((b) => {
+			b.update();
+		});
+	}
+
+	draw() {
+		this.topObstacles.forEach((b) => {
+			b.draw();
+		});
+	}
+}
+
+let manager = new ObstacleManager(ctx);
+manager.init();
 
 function animate() {
 	// clear the screen
 	ctx?.clearRect(0, 0, canvas.width, canvas.height);
 
-	o.update();
-	o.draw();
+	manager.update();
+	manager.draw();
 
 	requestAnimationFrame(animate);
 }
