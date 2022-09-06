@@ -25,11 +25,14 @@ class Obstacle {
 		this.x = canvas.width;
 		this.y = 0;
 
+		this.isVisible = true;
+
 		this.color = "blue";
 	}
 
 	update() {
 		this.x = this.x - gameSpeed;
+		this.isVisible = this.x + this.w > 0;
 	}
 
 	draw() {
