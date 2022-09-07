@@ -45,12 +45,12 @@ class ObstacleManager {
 	constructor(ctx) {
 		this.ctx = ctx;
 		this.topObstacles = [];
+		this.minTopObs = canvas.width / TOP_OBSTACLE_WIDTH + 2;
 	}
 
 	init() {
-		let minTopObs = canvas.width / TOP_OBSTACLE_WIDTH + 2;
 		let currentX = 0;
-		while (this.topObstacles.length < minTopObs) {
+		while (this.topObstacles.length < this.minTopObs) {
 			let o = new Obstacle(MAX_TOP_OBSTACLE_HEIGHT, this.ctx);
 			o.x = currentX;
 			this.topObstacles.push(o);
@@ -62,6 +62,21 @@ class ObstacleManager {
 		this.topObstacles.forEach((b) => {
 			b.update();
 		});
+
+		this.topObstacles = this.topObstacles.filter((o) => o.isVisible);
+		let heightMult = Math.random() * 20;
+
+		while (this.topObstacles.length < this.minTopObs) {
+			let nextX =
+				this.topObstacles[this.topObstacles.length - 1].x +
+				TOP_OBSTACLE_WIDTH;
+			let o = new Obstacle(
+				MAX_TOP_OBSTACLE_HEIGHT + heightMult,
+				this.ctx
+			);
+			o.x = nextX;
+			this.topObstacles.push(o);
+		}
 	}
 
 	draw() {
