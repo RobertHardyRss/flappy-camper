@@ -46,6 +46,17 @@ class ObstacleManager {
 		this.ctx = ctx;
 		this.topObstacles = [];
 		this.minTopObs = canvas.width / TOP_OBSTACLE_WIDTH + 2;
+		this.topObsState = {
+			isGoingUp: false,
+			stepCount: 0,
+			stepLimit: 5,
+			stepSize: 10,
+			recalc: function () {
+				this.isGoingUp = !this.isGoingUp;
+				this.stepLimit = Math.random() * 17 + 3;
+				this.stepCount = 0;
+			},
+		};
 	}
 
 	init() {
@@ -56,6 +67,8 @@ class ObstacleManager {
 			this.topObstacles.push(o);
 			currentX += TOP_OBSTACLE_WIDTH;
 		}
+
+		this.topObsState.recalc();
 	}
 
 	update() {
@@ -64,16 +77,22 @@ class ObstacleManager {
 		});
 
 		this.topObstacles = this.topObstacles.filter((o) => o.isVisible);
-		let heightMult = Math.random() * 20;
 
 		while (this.topObstacles.length < this.minTopObs) {
-			let nextX =
-				this.topObstacles[this.topObstacles.length - 1].x +
-				TOP_OBSTACLE_WIDTH;
-			let o = new Obstacle(
-				MAX_TOP_OBSTACLE_HEIGHT + heightMult,
-				this.ctx
-			);
+			// if we have reached our step limit, recalculate
+			if (this.topObsState.stepCount >= this.topObsState.stepLimit) {
+				this.topObsState.recalc();
+			}
+
+			let lastObs = this.topObstacles[this.topObstacles.length - 1];
+			let nextX = lastObs.x + TOP_OBSTACLE_WIDTH;
+			let nextH = this.topObsState.isGoingUp
+				? lastObs.h + this.topObsState.stepSize
+				: lastObs.h - this.topObsState.stepSize;
+
+			this.topObsState.stepCount++;
+
+			let o = new Obstacle(nextH, this.ctx);
 			o.x = nextX;
 			this.topObstacles.push(o);
 		}
