@@ -121,11 +121,7 @@ class ObstacleManager {
 	}
 
 	update() {
-		this.topObstacles.forEach((b) => {
-			b.update();
-		});
-
-		this.bottoms.forEach((b) => {
+		[...this.topObstacles, ...this.bottoms].forEach((b) => {
 			b.update();
 		});
 
@@ -157,14 +153,22 @@ class ObstacleManager {
 			o.x = nextX;
 			this.topObstacles.push(o);
 		}
+
+		this.bottoms = this.bottoms.filter((o) => o.isVisible);
+		let lastBottom = this.bottoms[this.bottoms.length - 1];
+		if (lastBottom.x <= canvas.width) {
+			let h =
+				Math.random() * MAX_BOTTOM_OBSTACLE_HEIGHT +
+				MIN_BOTTOM_OBSTACLE_HEIGHT;
+
+			let o = new BottomObstacle(h, this.ctx);
+			o.x = lastBottom.x + lastBottom.w;
+			this.bottoms.push(o);
+		}
 	}
 
 	draw() {
-		this.topObstacles.forEach((b) => {
-			b.draw();
-		});
-
-		this.bottoms.forEach((b) => {
+		[...this.topObstacles, ...this.bottoms].forEach((b) => {
 			b.draw();
 		});
 	}
