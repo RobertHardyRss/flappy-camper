@@ -10,7 +10,13 @@ canvas.height = 600;
 
 const MAX_TOP_OBSTACLE_HEIGHT = 200;
 const MIN_TOP_OBSTACLE_HEIGHT = 50;
+const MAX_BOTTOM_OBSTACLE_HEIGHT = 340;
+const MIN_BOTTOM_OBSTACLE_HEIGHT = 50;
+
 const TOP_OBSTACLE_WIDTH = 2;
+const BOTTOM_OBSTACLE_WIDTH_MIN = 100;
+const BOTTOM_OBSTACLE_WIDTH_MAX = canvas.width / 2;
+
 let gameSpeed = 6;
 
 class Obstacle {
@@ -66,7 +72,8 @@ class BottomObstacle extends Obstacle {
 			canvas.width,
 			canvas.height - h,
 			h,
-			TOP_OBSTACLE_WIDTH,
+			Math.random() * BOTTOM_OBSTACLE_WIDTH_MAX +
+				BOTTOM_OBSTACLE_WIDTH_MIN,
 			"green",
 			ctx
 		);
@@ -77,6 +84,7 @@ class ObstacleManager {
 	constructor(ctx) {
 		this.ctx = ctx;
 		this.topObstacles = [];
+		this.bottoms = [];
 		this.minTopObs = canvas.width / TOP_OBSTACLE_WIDTH + 2;
 		this.topObsState = {
 			isGoingUp: false,
@@ -101,10 +109,23 @@ class ObstacleManager {
 		}
 
 		this.topObsState.recalc();
+
+		currentX = 0;
+		for (let n = 0; n < 8; n++) {
+			let o = new BottomObstacle(MIN_BOTTOM_OBSTACLE_HEIGHT, this.ctx);
+			o.w = BOTTOM_OBSTACLE_WIDTH_MIN;
+			o.x = currentX;
+			this.bottoms.push(o);
+			currentX += o.w;
+		}
 	}
 
 	update() {
 		this.topObstacles.forEach((b) => {
+			b.update();
+		});
+
+		this.bottoms.forEach((b) => {
 			b.update();
 		});
 
@@ -140,6 +161,10 @@ class ObstacleManager {
 
 	draw() {
 		this.topObstacles.forEach((b) => {
+			b.draw();
+		});
+
+		this.bottoms.forEach((b) => {
 			b.draw();
 		});
 	}
