@@ -17,8 +17,10 @@ export class BottomObstacle extends Obstacle {
 			CANVAS_WIDTH,
 			CANVAS_HEIGHT - h,
 			h,
-			Math.random() * BOTTOM_OBSTACLE_WIDTH_MAX +
-				BOTTOM_OBSTACLE_WIDTH_MIN,
+			Math.floor(
+				Math.random() * BOTTOM_OBSTACLE_WIDTH_MAX +
+					BOTTOM_OBSTACLE_WIDTH_MIN
+			),
 			"green",
 			ctx
 		);
