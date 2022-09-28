@@ -15,7 +15,6 @@ class Player {
 		this.x = 150;
 		this.y = CANVAS_HEIGHT / 2 + this.h / 2;
 
-		this.weight = 1;
 		this.vy = 0; //  the current velocity of y
 		this.vyMax = 5;
 		this.maxY = CANVAS_HEIGHT - 25 - this.h;
@@ -24,7 +23,7 @@ class Player {
 	}
 
 	update() {
-		this.y += this.vy * this.weight;
+		this.y += this.vy;
 		this.y = Math.min(this.y, this.maxY);
 		this.vy += 0.1;
 
@@ -43,16 +42,45 @@ class Player {
 	}
 
 	flap() {
+		if (this.vy > 0) {
+			this.vy = 0;
+		}
+
 		this.vy -= 2;
 	}
 
 	wireUpEvents() {
-		window.addEventListener("keypress", (ev) => {
+		window.addEventListener("keydown", (ev) => {
 			console.log(ev);
-			if (ev.code === "Space") {
-				this.flap();
+
+			switch (ev.code) {
+				case "Space":
+				case "ArrowUp":
+				case "KeyW":
+					this.flap();
+					break;
 			}
 		});
+	}
+}
+
+class Particle {
+	/**
+	 * @param {Number} x
+	 * @param {Number} y
+	 * @param {Number} r
+	 * @param {string} color
+	 * @param {CanvasRenderingContext2D} ctx
+	 */
+	constructor(x, y, r, color, ctx) {
+		this.x = x;
+		this.y = y;
+		this.r = r;
+		this.color = color;
+		this.ctx = ctx;
+
+		this.yChange = (Math.random() * 2 + 0.2) * -1;
+		this.rChange = Math.random() * 3 + 1;
 	}
 }
 
