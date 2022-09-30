@@ -1,5 +1,6 @@
 //@ts-check
 import { ctx, CANVAS_HEIGHT, CANVAS_WIDTH } from "./constants.js";
+import { game } from "./game.js";
 import { ObstacleManager } from "./obstacles/obstacle-manager.js";
 
 class Player {
@@ -19,6 +20,8 @@ class Player {
 		this.vyMax = 5;
 		this.maxY = CANVAS_HEIGHT - 25 - this.h;
 
+		this.dust = [];
+
 		this.wireUpEvents();
 	}
 
@@ -26,6 +29,14 @@ class Player {
 		this.y += this.vy;
 		this.y = Math.min(this.y, this.maxY);
 		this.vy += 0.1;
+
+		this.dust.push(new HappyDust(this));
+		this.dust.forEach((p) => {
+			p.update();
+		});
+		this.dust = this.dust.filter((p) => {
+			p.isVisible;
+		});
 
 		if (Math.abs(this.vy) > this.vyMax) {
 			if (this.vy > 0) {
@@ -39,6 +50,9 @@ class Player {
 	draw() {
 		this.ctx.fillStyle = "red";
 		this.ctx.fillRect(this.x, this.y, this.w, this.h);
+		this.dust.forEach((p) => {
+			p.draw();
+		});
 	}
 
 	flap() {
@@ -81,6 +95,37 @@ class Particle {
 
 		this.yChange = (Math.random() * 2 + 0.2) * -1;
 		this.rChange = Math.random() * 3 + 1;
+
+		this.isVisible = true;
+		this.opacity = 1;
+		this.opacityChange = 0.05;
+	}
+
+	update() {
+		this.x -= game.gameSpeed;
+		this.y += this.yChange;
+		this.r += this.rChange;
+		this.opacity -= this.opacityChange;
+		this.isVisible = this.x + this.r > 0 || this.opacity > 0;
+	}
+
+	draw() {
+		this.ctx.save();
+		this.ctx.globalAlpha = 1;
+		this.ctx.fillStyle = this.color;
+		this.ctx.beginPath();
+		this.ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2, true);
+		this.ctx.fill();
+		this.ctx.restore();
+	}
+}
+
+class HappyDust extends Particle {
+	/**
+	 * @param {Player} player
+	 */
+	constructor(player) {
+		super(player.x, player.y + player.h, 2, "pink", player.ctx);
 	}
 }
 
