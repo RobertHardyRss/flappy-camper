@@ -34,9 +34,7 @@ class Player {
 		this.dust.forEach((p) => {
 			p.update();
 		});
-		this.dust = this.dust.filter((p) => {
-			p.isVisible;
-		});
+		this.dust = this.dust.filter((p) => p.isVisible);
 
 		if (Math.abs(this.vy) > this.vyMax) {
 			if (this.vy > 0) {
@@ -93,8 +91,8 @@ class Particle {
 		this.color = color;
 		this.ctx = ctx;
 
-		this.yChange = (Math.random() * 2 + 0.2) * -1;
-		this.rChange = Math.random() * 3 + 1;
+		this.yChange = (Math.random() * 5 + 0.2) * -1;
+		this.rChange = Math.random() * 0.5 + 1;
 
 		this.isVisible = true;
 		this.opacity = 1;
@@ -105,13 +103,16 @@ class Particle {
 		this.x -= game.gameSpeed;
 		this.y += this.yChange;
 		this.r += this.rChange;
+
 		this.opacity -= this.opacityChange;
+		if (this.opacity < 0) this.opacity = 0;
+
 		this.isVisible = this.x + this.r > 0 || this.opacity > 0;
 	}
 
 	draw() {
 		this.ctx.save();
-		this.ctx.globalAlpha = 1;
+		this.ctx.globalAlpha = this.opacity;
 		this.ctx.fillStyle = this.color;
 		this.ctx.beginPath();
 		this.ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2, true);
@@ -126,6 +127,7 @@ class HappyDust extends Particle {
 	 */
 	constructor(player) {
 		super(player.x, player.y + player.h, 2, "pink", player.ctx);
+		this.color = "hsl(" + Math.floor(Math.random() * 360) + ", 100%, 50%)";
 	}
 }
 
