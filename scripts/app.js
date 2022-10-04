@@ -3,6 +3,9 @@ import { ctx, CANVAS_HEIGHT, CANVAS_WIDTH } from "./constants.js";
 import { game } from "./game.js";
 import { ObstacleManager } from "./obstacles/obstacle-manager.js";
 
+// 1923 x 1626
+// 641 X 542 for each frame
+
 class Player {
 	/**
 	 * @param {CanvasRenderingContext2D} ctx
@@ -21,6 +24,8 @@ class Player {
 		this.maxY = CANVAS_HEIGHT - 25 - this.h;
 
 		this.dust = [];
+
+		this.image = document.getElementById("player-run");
 
 		this.wireUpEvents();
 	}
@@ -48,6 +53,19 @@ class Player {
 	draw() {
 		this.ctx.fillStyle = "red";
 		this.ctx.fillRect(this.x, this.y, this.w, this.h);
+
+		this.ctx.drawImage(
+			this.image,
+			0,
+			0,
+			641,
+			542,
+			this.x,
+			this.y,
+			100,
+			100
+		);
+
 		this.dust.forEach((p) => {
 			p.draw();
 		});
