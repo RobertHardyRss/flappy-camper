@@ -25,7 +25,28 @@ class Player {
 
 		this.dust = [];
 
-		this.image = document.getElementById("player-run");
+		this.image = {
+			/** @type {HTMLImageElement} */ //@ts-ignore
+			src: document.getElementById("player-run"),
+			fps: 15,
+			frames: [
+				{ x: 0, y: 0 },
+				{ x: 641, y: 0 },
+				{ x: 1282, y: 0 },
+				{ x: 0, y: 542 },
+				{ x: 641, y: 542 },
+				{ x: 1282, y: 542 },
+				{ x: 0, y: 1084 },
+				{ x: 641, y: 1084 },
+			],
+			currentFrame: 0,
+			next: function () {
+				this.currentFrame++;
+				if (this.currentFrame >= this.frames.length) {
+					this.currentFrame = 0;
+				}
+			},
+		};
 
 		this.wireUpEvents();
 	}
@@ -55,15 +76,15 @@ class Player {
 		this.ctx.fillRect(this.x, this.y, this.w, this.h);
 
 		this.ctx.drawImage(
-			this.image,
-			0,
-			0,
-			641,
-			542,
-			this.x,
-			this.y,
-			100,
-			100
+			this.image.src, // the image we want to draw
+			0, // x coord of where to start our clip
+			0, // y coord of where to start our clip
+			641, // x coord of where to end our clip
+			542, // y coord of where to end our clip
+			this.x, // this the x coord of where to place the image
+			this.y, // this the y coord of where to place the image
+			100, // the width of the image
+			100 // the height of the image
 		);
 
 		this.dust.forEach((p) => {
