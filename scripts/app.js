@@ -69,6 +69,8 @@ class Player {
 				this.vy = this.vyMax * -1;
 			}
 		}
+
+		this.image.next();
 	}
 
 	draw() {
@@ -77,8 +79,8 @@ class Player {
 
 		this.ctx.drawImage(
 			this.image.src, // the image we want to draw
-			0, // x coord of where to start our clip
-			0, // y coord of where to start our clip
+			this.image.frames[this.image.currentFrame].x, // x coord of where to start our clip
+			this.image.frames[this.image.currentFrame].y, // y coord of where to start our clip
 			641, // x coord of where to end our clip
 			542, // y coord of where to end our clip
 			this.x, // this the x coord of where to place the image
