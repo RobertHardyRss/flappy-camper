@@ -40,7 +40,12 @@ class Player {
 				{ x: 641, y: 1084 },
 			],
 			currentFrame: 0,
-			next: function () {
+			lastFrameChange: 0,
+			next: function (timeElapsed) {
+				this.lastFrameChange += timeElapsed;
+				if (this.lastFrameChange < 1000 / this.fps) return;
+				this.lastFrameChange = 0;
+
 				this.currentFrame++;
 				if (this.currentFrame >= this.frames.length) {
 					this.currentFrame = 0;
@@ -51,7 +56,10 @@ class Player {
 		this.wireUpEvents();
 	}
 
-	update() {
+	/**
+	 * @param {number} timeElapsed
+	 */
+	update(timeElapsed) {
 		this.y += this.vy;
 		this.y = Math.min(this.y, this.maxY);
 		this.vy += 0.1;
@@ -70,7 +78,7 @@ class Player {
 			}
 		}
 
-		this.image.next();
+		this.image.next(timeElapsed);
 	}
 
 	draw() {
@@ -176,15 +184,22 @@ let manager = new ObstacleManager(ctx);
 manager.init();
 
 let p = new Player(ctx);
+let currentTime = 0;
 
-function animate() {
+/**
+ * @param {number} timestamp
+ */
+function animate(timestamp) {
+	let timeElapsed = timestamp - currentTime;
+	currentTime = timestamp;
+
 	// clear the screen
 	ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
 	manager.update();
 	manager.draw();
 
-	p.update();
+	p.update(timeElapsed);
 	p.draw();
 
 	requestAnimationFrame(animate);
