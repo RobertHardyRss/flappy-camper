@@ -1,12 +1,11 @@
 //@ts-check
-import { ctx, CANVAS_HEIGHT, CANVAS_WIDTH } from "./constants.js";
+import { CollisionManager } from "./collision-manager.js";
+import { ctx, CANVAS_HEIGHT, CANVAS_WIDTH, EVENTS } from "./constants.js";
 import { game } from "./game.js";
 import { ObstacleManager } from "./obstacles/obstacle-manager.js";
+import { MIN_PEAK_HEIGHT } from "./obstacles/trail-peak.js";
 
-// 1923 x 1626
-// 641 X 542 for each frame
-
-class Player {
+export class Player {
 	/**
 	 * @param {CanvasRenderingContext2D} ctx
 	 */
@@ -22,6 +21,7 @@ class Player {
 		this.vy = 0; //  the current velocity of y
 		this.vyMax = 5;
 		this.maxY = CANVAS_HEIGHT - 25 - this.h;
+		this.minY = MIN_PEAK_HEIGHT;
 
 		this.dust = [];
 
@@ -43,7 +43,7 @@ class Player {
 			lastFrameChange: 0,
 			xOffset: -33,
 			yOffset: -65,
-			next: function (timeElapsed) {
+			next: function (/** @type {number} */ timeElapsed) {
 				this.lastFrameChange += timeElapsed;
 				if (this.lastFrameChange < 1000 / this.fps) return;
 				this.lastFrameChange = 0;
@@ -53,9 +53,12 @@ class Player {
 					this.currentFrame = 0;
 				}
 			},
+			xOffset: -30,
+			yOffset: -67,
 		};
 
 		this.wireUpEvents();
+		this.color = "red";
 	}
 
 	/**
@@ -63,7 +66,7 @@ class Player {
 	 */
 	update(timeElapsed) {
 		this.y += this.vy;
-		this.y = Math.min(this.y, this.maxY);
+		this.y = Math.max(Math.min(this.y, this.maxY), this.minY);
 		this.vy += 0.1;
 
 		this.dust.push(new HappyDust(this));
@@ -114,7 +117,7 @@ class Player {
 
 	wireUpEvents() {
 		window.addEventListener("keydown", (ev) => {
-			console.log(ev);
+			// console.log(ev);
 
 			switch (ev.code) {
 				case "Space":
@@ -124,6 +127,24 @@ class Player {
 					break;
 			}
 		});
+
+		window.addEventListener(
+			EVENTS.onTrail,
+			(/** @type {CustomEventInit} */ e) => {
+				// console.log("On trail", e);
+				this.minY = e.detail.lowestTopHeight - this.h;
+				this.color = "red";
+			}
+		);
+
+		window.addEventListener(
+			EVENTS.offTrail,
+			(/** @type {CustomEventInit} */ e) => {
+				//console.log("Off Trail", e);
+				this.minY = e.detail.lowestTopHeight - this.h;
+				this.color = "black";
+			}
+		);
 	}
 }
 
@@ -177,8 +198,8 @@ class HappyDust extends Particle {
 	 * @param {Player} player
 	 */
 	constructor(player) {
-		super(player.x, player.y + player.h, 2, "pink", player.ctx);
-		this.color = "hsl(" + Math.floor(Math.random() * 360) + ", 100%, 50%)";
+		super(player.x, player.y + player.h, 5, "pink", player.ctx);
+		this.color = `hsl(${Math.floor(Math.random() * 360)}, 100%, 50%)`;
 	}
 }
 
@@ -188,23 +209,23 @@ manager.init();
 let p = new Player(ctx);
 let currentTime = 0;
 
-/**
- * @param {number} timestamp
- */
-function animate(timestamp) {
+let collisions = new CollisionManager(p, manager);
+
+function gameLoop(timestamp) {
 	let timeElapsed = timestamp - currentTime;
 	currentTime = timestamp;
 
 	// clear the screen
 	ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-	manager.update();
-	manager.draw();
-
+	manager.update(timeElapsed);
 	p.update(timeElapsed);
+	collisions.update(timeElapsed);
+
+	manager.draw();
 	p.draw();
 
-	requestAnimationFrame(animate);
+	requestAnimationFrame(gameLoop);
 }
 
-requestAnimationFrame(animate);
+requestAnimationFrame(gameLoop);

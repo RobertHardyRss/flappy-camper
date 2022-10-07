@@ -1,16 +1,18 @@
 //@ts-check
 import { game } from "../game.js";
 
-export class Obstacle {
+export class Collidable {
 	/**
-	 * @param {Number} x
-	 * @param {Number} y
-	 * @param {Number} h
-	 * @param {Number} w
-	 * @param {String} color
+	 * @param {number} type
+	 * @param {number} x
+	 * @param {number} y
+	 * @param {number} h
+	 * @param {number} w
+	 * @param {string} color
 	 * @param {CanvasRenderingContext2D} ctx
 	 */
-	constructor(x, y, h, w, color, ctx) {
+	constructor(type, x, y, h, w, color, ctx) {
+		this.type = type;
 		this.ctx = ctx;
 		this.h = h;
 		this.w = w;
@@ -19,8 +21,12 @@ export class Obstacle {
 		this.y = y;
 
 		this.isVisible = true;
-
 		this.color = color;
+
+		this.limitsPlayerHeight = false;
+		this.karmaImpact = 0;
+		this.staminaImpact = 0;
+		this.isCollectable = false;
 	}
 
 	update() {
@@ -33,3 +39,8 @@ export class Obstacle {
 		this.ctx.fillRect(this.x, this.y, this.w, this.h);
 	}
 }
+
+export const collidableType = {
+	Peak: 0,
+	Forest: 1,
+};

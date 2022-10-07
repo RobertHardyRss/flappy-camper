@@ -3,7 +3,7 @@ import { ctx } from "./constants.js";
 class Game {
 	constructor(ctx) {
 		this.ctx = ctx;
-		this.gameSpeed = 6;
+		this.gameSpeed = 5;
 	}
 }
 

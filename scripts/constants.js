@@ -12,3 +12,8 @@ canvas.height = CANVAS_HEIGHT;
 //@ts-ignore
 export const ctx = canvas.getContext("2d");
 if (!ctx) throw "ctx is null or undefined!";
+
+export const EVENTS = {
+	onTrail: "fc_ontrail",
+	offTrail: "fc_offtrail",
+};

@@ -1,17 +1,17 @@
 //@ts-check
 import { CANVAS_WIDTH } from "../constants.js";
 import {
-	MAX_TOP_OBSTACLE_HEIGHT,
-	MIN_TOP_OBSTACLE_HEIGHT,
-	TopObstacle,
-	TOP_OBSTACLE_WIDTH,
-} from "./top-obstacle.js";
+	MAX_PEAK_HEIGHT,
+	MIN_PEAK_HEIGHT,
+	TrailPeak,
+	PEAK_WIDTH,
+} from "./trail-peak.js";
 import {
-	BottomObstacle,
-	BOTTOM_OBSTACLE_WIDTH_MIN,
-	MAX_BOTTOM_OBSTACLE_HEIGHT,
-	MIN_BOTTOM_OBSTACLE_HEIGHT,
-} from "./bottom-obstacle.js";
+	Forest,
+	FOREST_WIDTH_MIN,
+	MAX_FOREST_HEIGHT,
+	MIN_FOREST_HEIGHT,
+} from "./forest.js";
 
 export class ObstacleManager {
 	/**
@@ -21,12 +21,12 @@ export class ObstacleManager {
 		this.ctx = ctx;
 		this.topObstacles = [];
 		this.bottoms = [];
-		this.minTopObs = CANVAS_WIDTH / TOP_OBSTACLE_WIDTH + 2;
+		this.minTopObs = CANVAS_WIDTH / PEAK_WIDTH + 2;
 		this.topObsState = {
 			isGoingUp: false,
 			stepCount: 0,
 			stepLimit: 5,
-			stepSize: TOP_OBSTACLE_WIDTH,
+			stepSize: PEAK_WIDTH,
 			recalc: function () {
 				this.isGoingUp = !this.isGoingUp;
 				this.stepLimit = Math.random() * 17 + 3;
@@ -38,25 +38,28 @@ export class ObstacleManager {
 	init() {
 		let currentX = 0;
 		while (this.topObstacles.length < this.minTopObs) {
-			let o = new TopObstacle(MAX_TOP_OBSTACLE_HEIGHT, this.ctx);
+			let o = new TrailPeak(MAX_PEAK_HEIGHT, this.ctx);
 			o.x = currentX;
 			this.topObstacles.push(o);
-			currentX += TOP_OBSTACLE_WIDTH;
+			currentX += PEAK_WIDTH;
 		}
 
 		this.topObsState.recalc();
 
 		currentX = 0;
 		for (let n = 0; n < 8; n++) {
-			let o = new BottomObstacle(MIN_BOTTOM_OBSTACLE_HEIGHT, this.ctx);
-			o.w = BOTTOM_OBSTACLE_WIDTH_MIN;
+			let o = new Forest(MIN_FOREST_HEIGHT, this.ctx);
+			o.w = FOREST_WIDTH_MIN;
 			o.x = currentX;
 			this.bottoms.push(o);
 			currentX += o.w;
 		}
 	}
 
-	update() {
+	/**
+	 * @param {number} timeElapsed
+	 */
+	update(timeElapsed) {
 		[...this.topObstacles, ...this.bottoms].forEach((b) => {
 			b.update();
 		});
@@ -70,22 +73,22 @@ export class ObstacleManager {
 			}
 
 			let lastObs = this.topObstacles[this.topObstacles.length - 1];
-			let nextX = lastObs.x + TOP_OBSTACLE_WIDTH;
+			let nextX = lastObs.x + PEAK_WIDTH;
 			let nextH = this.topObsState.isGoingUp
 				? lastObs.h + this.topObsState.stepSize
 				: lastObs.h - this.topObsState.stepSize;
 
-			if (nextH > MAX_TOP_OBSTACLE_HEIGHT) {
-				nextH = MAX_TOP_OBSTACLE_HEIGHT;
+			if (nextH > MAX_PEAK_HEIGHT) {
+				nextH = MAX_PEAK_HEIGHT;
 				this.topObsState.recalc();
-			} else if (nextH < MIN_TOP_OBSTACLE_HEIGHT) {
-				nextH = MIN_TOP_OBSTACLE_HEIGHT;
+			} else if (nextH < MIN_PEAK_HEIGHT) {
+				nextH = MIN_PEAK_HEIGHT;
 				this.topObsState.recalc();
 			}
 
 			this.topObsState.stepCount++;
 
-			let o = new TopObstacle(nextH, this.ctx);
+			let o = new TrailPeak(nextH, this.ctx);
 			o.x = nextX;
 			this.topObstacles.push(o);
 		}
@@ -94,11 +97,10 @@ export class ObstacleManager {
 		let lastBottom = this.bottoms[this.bottoms.length - 1];
 		if (lastBottom.x <= CANVAS_WIDTH) {
 			let h =
-				Math.random() *
-					(MAX_BOTTOM_OBSTACLE_HEIGHT - MIN_BOTTOM_OBSTACLE_HEIGHT) +
-				MIN_BOTTOM_OBSTACLE_HEIGHT;
+				Math.random() * (MAX_FOREST_HEIGHT - MIN_FOREST_HEIGHT) +
+				MIN_FOREST_HEIGHT;
 
-			let o = new BottomObstacle(h, this.ctx);
+			let o = new Forest(h, this.ctx);
 			o.x = lastBottom.x + lastBottom.w;
 			this.bottoms.push(o);
 		}
