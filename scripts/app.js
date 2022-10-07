@@ -14,7 +14,7 @@ class Player {
 		this.ctx = ctx;
 
 		this.h = 32;
-		this.w = this.h * 2;
+		this.w = 32;
 
 		this.x = 150;
 		this.y = CANVAS_HEIGHT / 2 + this.h / 2;
@@ -41,6 +41,8 @@ class Player {
 			],
 			currentFrame: 0,
 			lastFrameChange: 0,
+			xOffset: -33,
+			yOffset: -65,
 			next: function (timeElapsed) {
 				this.lastFrameChange += timeElapsed;
 				if (this.lastFrameChange < 1000 / this.fps) return;
@@ -82,8 +84,8 @@ class Player {
 	}
 
 	draw() {
-		this.ctx.fillStyle = "red";
-		this.ctx.fillRect(this.x, this.y, this.w, this.h);
+		// this.ctx.fillStyle = "red";
+		// this.ctx.fillRect(this.x, this.y, this.w, this.h);
 
 		this.ctx.drawImage(
 			this.image.src, // the image we want to draw
@@ -91,8 +93,8 @@ class Player {
 			this.image.frames[this.image.currentFrame].y, // y coord of where to start our clip
 			641, // x coord of where to end our clip
 			542, // y coord of where to end our clip
-			this.x, // this the x coord of where to place the image
-			this.y, // this the y coord of where to place the image
+			this.x + this.image.xOffset, // this the x coord of where to place the image
+			this.y + this.image.yOffset, // this the y coord of where to place the image
 			100, // the width of the image
 			100 // the height of the image
 		);
