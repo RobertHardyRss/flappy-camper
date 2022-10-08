@@ -1,7 +1,7 @@
 //@ts-check
 import { ObstacleManager } from "./obstacles/obstacle-manager.js";
 import { EVENTS } from "./constants.js";
-import { Player } from "./app.js";
+import { Player } from "./player.js";
 import { Collidable, collidableType } from "./obstacles/collidable.js";
 
 export class CollisionManager {
