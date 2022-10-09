@@ -1,5 +1,10 @@
 //@ts-check
-import { CANVAS_WIDTH, CANVAS_HEIGHT } from "../constants.js";
+import {
+	CANVAS_WIDTH,
+	CANVAS_HEIGHT,
+	KARMA_OFF_TRAIL,
+	STAMINA_OFF_TRAIL,
+} from "../constants.js";
 import { Collidable, collidableType } from "./collidable.js";
 
 export const FOREST_WIDTH_MIN = 100;
@@ -22,6 +27,7 @@ export class Forest extends Collidable {
 			"green",
 			ctx
 		);
-		this.karmaImpact = -10;
+		this.karmaImpact = KARMA_OFF_TRAIL;
+		this.staminaImpact = STAMINA_OFF_TRAIL;
 	}
 }

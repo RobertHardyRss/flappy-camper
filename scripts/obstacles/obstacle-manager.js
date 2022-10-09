@@ -1,5 +1,5 @@
 //@ts-check
-import { CANVAS_WIDTH } from "../constants.js";
+import { CANVAS_WIDTH, LOWEST_REACHABLE_POINT } from "../constants.js";
 import {
 	MAX_PEAK_HEIGHT,
 	MIN_PEAK_HEIGHT,
@@ -12,6 +12,9 @@ import {
 	MAX_FOREST_HEIGHT,
 	MIN_FOREST_HEIGHT,
 } from "./forest.js";
+import { Trash } from "../collectable/trash.js";
+import { Collidable } from "./collidable.js";
+import { Food } from "../collectable/food.js";
 
 export class ObstacleManager {
 	/**
@@ -19,10 +22,10 @@ export class ObstacleManager {
 	 */
 	constructor(ctx) {
 		this.ctx = ctx;
-		this.topObstacles = [];
-		this.bottoms = [];
-		this.minTopObs = CANVAS_WIDTH / PEAK_WIDTH + 2;
-		this.topObsState = {
+		this.peaks = [];
+		this.forests = [];
+		this.minPeaks = CANVAS_WIDTH / PEAK_WIDTH + 20;
+		this.peakState = {
 			isGoingUp: false,
 			stepCount: 0,
 			stepLimit: 5,
@@ -33,25 +36,32 @@ export class ObstacleManager {
 				this.stepCount = 0;
 			},
 		};
+
+		this.trash = [];
+		this.nextTrashTime = 1000;
+		this.lastTrashTime = 0;
+		this.food = [];
+		this.nextFoodTime = 2000;
+		this.lastFoodTime = 0;
 	}
 
 	init() {
 		let currentX = 0;
-		while (this.topObstacles.length < this.minTopObs) {
+		while (this.peaks.length < this.minPeaks) {
 			let o = new TrailPeak(MAX_PEAK_HEIGHT, this.ctx);
 			o.x = currentX;
-			this.topObstacles.push(o);
+			this.peaks.push(o);
 			currentX += PEAK_WIDTH;
 		}
 
-		this.topObsState.recalc();
+		this.peakState.recalc();
 
 		currentX = 0;
 		for (let n = 0; n < 8; n++) {
 			let o = new Forest(MIN_FOREST_HEIGHT, this.ctx);
 			o.w = FOREST_WIDTH_MIN;
 			o.x = currentX;
-			this.bottoms.push(o);
+			this.forests.push(o);
 			currentX += o.w;
 		}
 	}
@@ -60,41 +70,80 @@ export class ObstacleManager {
 	 * @param {number} timeElapsed
 	 */
 	update(timeElapsed) {
-		[...this.topObstacles, ...this.bottoms].forEach((b) => {
-			b.update();
-		});
-
-		this.topObstacles = this.topObstacles.filter((o) => o.isVisible);
-
-		while (this.topObstacles.length < this.minTopObs) {
-			// if we have reached our step limit, recalculate
-			if (this.topObsState.stepCount >= this.topObsState.stepLimit) {
-				this.topObsState.recalc();
+		[...this.peaks, ...this.forests, ...this.food, ...this.trash].forEach(
+			(b) => {
+				b.update();
 			}
+		);
 
-			let lastObs = this.topObstacles[this.topObstacles.length - 1];
-			let nextX = lastObs.x + PEAK_WIDTH;
-			let nextH = this.topObsState.isGoingUp
-				? lastObs.h + this.topObsState.stepSize
-				: lastObs.h - this.topObsState.stepSize;
+		this.updateTrash(timeElapsed);
+		this.updateFood(timeElapsed);
+		this.updatePeaks();
+		this.updateForests();
+	}
 
-			if (nextH > MAX_PEAK_HEIGHT) {
-				nextH = MAX_PEAK_HEIGHT;
-				this.topObsState.recalc();
-			} else if (nextH < MIN_PEAK_HEIGHT) {
-				nextH = MIN_PEAK_HEIGHT;
-				this.topObsState.recalc();
-			}
+	/**
+	 * @param {number} timeElapsed
+	 */
+	updateTrash(timeElapsed) {
+		this.trash = this.trash.filter((o) => o.isVisible && !o.isCollected);
 
-			this.topObsState.stepCount++;
+		this.lastTrashTime += timeElapsed;
+		if (this.lastTrashTime < this.nextTrashTime) return;
+		this.lastTrashTime = 0;
 
-			let o = new TrailPeak(nextH, this.ctx);
-			o.x = nextX;
-			this.topObstacles.push(o);
-		}
+		this.nextTrashTime = Math.floor(Math.random() * 2000 + 1000);
 
-		this.bottoms = this.bottoms.filter((o) => o.isVisible);
-		let lastBottom = this.bottoms[this.bottoms.length - 1];
+		const trash = new Trash(this.ctx);
+		trash.y = this.setCollectablePlacement(trash);
+
+		// console.log(trash);
+		this.trash.push(trash);
+	}
+
+	/**
+	 * @param {number} timeElapsed
+	 */
+	updateFood(timeElapsed) {
+		this.food = this.food.filter((o) => o.isVisible && !o.isCollected);
+
+		this.lastFoodTime += timeElapsed;
+		if (this.lastFoodTime < this.nextFoodTime) return;
+		this.lastFoodTime = 0;
+
+		this.nextFoodTime = Math.floor(Math.random() * 5000 + 10 * 1000);
+
+		const food = new Food(this.ctx);
+		food.y = this.setCollectablePlacement(food);
+
+		// console.log(food);
+		this.food.push(food);
+	}
+
+	/**
+	 * @param {Collidable} c
+	 */
+	setCollectablePlacement(c) {
+		// filter all peaks above the collectable, then then get the
+		// tallest one and that will set our minumum y placement
+		const minY = this.peaks
+			.filter(
+				(p) =>
+					(p.x >= c.x && p.x <= c.x + c.w) ||
+					(p.x + p.w >= c.x && p.x + p.w <= c.x + c.w)
+			)
+			.map((p) => p.h)
+			.reduce((a, b) => {
+				return a > b ? a : b;
+			});
+
+		let y = Math.random() * (LOWEST_REACHABLE_POINT - c.h - minY) + minY;
+		return y;
+	}
+
+	updateForests() {
+		this.forests = this.forests.filter((o) => o.isVisible);
+		let lastBottom = this.forests[this.forests.length - 1];
 		if (lastBottom.x <= CANVAS_WIDTH) {
 			let h =
 				Math.random() * (MAX_FOREST_HEIGHT - MIN_FOREST_HEIGHT) +
@@ -102,13 +151,46 @@ export class ObstacleManager {
 
 			let o = new Forest(h, this.ctx);
 			o.x = lastBottom.x + lastBottom.w;
-			this.bottoms.push(o);
+			this.forests.push(o);
+		}
+	}
+
+	updatePeaks() {
+		this.peaks = this.peaks.filter((o) => o.isVisible);
+
+		while (this.peaks.length < this.minPeaks) {
+			// if we have reached our step limit, recalculate
+			if (this.peakState.stepCount >= this.peakState.stepLimit) {
+				this.peakState.recalc();
+			}
+
+			let lastObs = this.peaks[this.peaks.length - 1];
+			let nextX = lastObs.x + PEAK_WIDTH;
+			let nextH = this.peakState.isGoingUp
+				? lastObs.h + this.peakState.stepSize
+				: lastObs.h - this.peakState.stepSize;
+
+			if (nextH > MAX_PEAK_HEIGHT) {
+				nextH = MAX_PEAK_HEIGHT;
+				this.peakState.recalc();
+			} else if (nextH < MIN_PEAK_HEIGHT) {
+				nextH = MIN_PEAK_HEIGHT;
+				this.peakState.recalc();
+			}
+
+			this.peakState.stepCount++;
+
+			let o = new TrailPeak(nextH, this.ctx);
+			o.x = nextX;
+			this.peaks.push(o);
 		}
 	}
 
 	draw() {
-		[...this.topObstacles, ...this.bottoms].forEach((b) => {
-			b.draw();
-		});
+		[...this.peaks, ...this.forests, ...this.food, ...this.trash].forEach(
+			(b) => {
+				b.draw();
+			}
+		);
 	}
 }

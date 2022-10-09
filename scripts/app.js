@@ -8,13 +8,11 @@ import { Scoreboard } from "./scoreboard.js";
 let manager = new ObstacleManager(ctx);
 manager.init();
 
-let p = new Player(ctx);
-let currentTime = 0;
-
+let score = new Scoreboard(ctx);
+let p = new Player(ctx, score);
 let collisions = new CollisionManager(p, manager);
 
-let score = new Scoreboard(ctx);
-
+let currentTime = 0;
 /**
  * @param {number} timestamp
  */
@@ -34,7 +32,9 @@ function gameLoop(timestamp) {
 	p.draw();
 	score.draw();
 
-	requestAnimationFrame(gameLoop);
+	if (score.trailKarma > 0) {
+		requestAnimationFrame(gameLoop);
+	}
 }
 
 requestAnimationFrame(gameLoop);

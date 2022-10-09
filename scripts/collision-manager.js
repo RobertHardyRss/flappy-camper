@@ -1,6 +1,6 @@
 //@ts-check
 import { ObstacleManager } from "./obstacles/obstacle-manager.js";
-import { EVENTS } from "./constants.js";
+import { EVENTS, KARMA_ON_TRAIL, STAMINA_ON_TRAIL } from "./constants.js";
 import { Player } from "./player.js";
 import { Collidable, collidableType } from "./obstacles/collidable.js";
 
@@ -39,7 +39,11 @@ export class CollisionManager {
 				}
 				break;
 			default:
-				return false;
+				const topBuffer = 68;
+				if (this.collisionZone.top - topBuffer > o.y + o.h)
+					return false;
+				if (this.collisionZone.bottom < o.y) return false;
+				return true;
 		}
 	}
 
@@ -56,10 +60,10 @@ export class CollisionManager {
 	}
 
 	/**
-	 * @param {Collidable[]} obstacles
+	 * @param {Collidable[]} collidables
 	 */
-	getObstaclesOfInterest(obstacles) {
-		return obstacles.filter(this.isInPlayerZone, this);
+	getCollidablesOfInterest(collidables) {
+		return collidables.filter(this.isInPlayerZone, this);
 	}
 
 	/**
@@ -68,17 +72,61 @@ export class CollisionManager {
 	update(timeElapsed) {
 		this.collisionZone.update();
 
+		this.updateCollidables(timeElapsed);
+		this.updateCollectables();
+	}
+
+	updateCollectables() {
+		const collectables = this.getCollidablesOfInterest([
+			...this.om.food,
+			...this.om.trash,
+		]);
+
+		// if we don't have any collectables that the player
+		// can pickup, return and do nothing
+		if (!collectables.length) return;
+
+		this.collected = collectables.filter(this.isColliding, this);
+
+		this.collected.forEach((c) => {
+			c.isCollected = true;
+			if (c.staminaImpact) {
+				let event = new CustomEvent(EVENTS.staminaChange, {
+					detail: c.staminaImpact,
+				});
+				window.dispatchEvent(event);
+			}
+
+			if (c.karmaImpact) {
+				let event = new CustomEvent(EVENTS.karmaChange, {
+					detail: c.karmaImpact,
+				});
+				window.dispatchEvent(event);
+			}
+		});
+	}
+
+	/**
+	 * @param {number} timeElapsed
+	 */
+	updateCollidables(timeElapsed) {
+		// we will send collision events for peaks, forests
+		// and we will also broadcast on-trail events when we
+		// are not colliding with bad stuff. We will broadcast
+		// these events based on the broadcastInterval value.
+
 		this.lastBroadcast += timeElapsed;
 		if (this.lastBroadcast < this.broadcastInterval) return;
 		this.lastBroadcast = 0;
 
-		const tops = this.getObstaclesOfInterest(this.om.topObstacles);
+		const tops = this.getCollidablesOfInterest(this.om.peaks);
 		const lowestTopHeight = tops
-			.map((c) => c.h)
-			.reduce((p, c) => {
-				return p > c ? p : c;
+			.map((c) => c.h) // map all tops to just an array of heights (h)
+			.reduce((a, b) => {
+				// reduce all heights to just the largest/lowest one
+				return a > b ? a : b;
 			});
-		const bottoms = this.getObstaclesOfInterest(this.om.bottoms);
+		const bottoms = this.getCollidablesOfInterest(this.om.forests);
 
 		this.collisions = [...tops, ...bottoms].filter(this.isColliding, this);
 		const data = new CollisionEventData();
@@ -120,12 +168,15 @@ export class CollisionEventData {
 	constructor() {
 		this.isPlayerOnTrail = true;
 		this.lowestTopHeight = 0;
-		this.karmaImpact = 1;
-		this.staminaImpact = 1;
+		this.karmaImpact = KARMA_ON_TRAIL;
+		this.staminaImpact = STAMINA_ON_TRAIL;
 	}
 }
 
 class CollisionZone {
+	/**
+	 * @param {Player} player
+	 */
 	constructor(player) {
 		this.player = player;
 		this.left = player.x;

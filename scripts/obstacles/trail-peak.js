@@ -1,5 +1,5 @@
 //@ts-check
-import { CANVAS_WIDTH } from "../constants.js";
+import { CANVAS_WIDTH, STAMINA_HIT_PEAK } from "../constants.js";
 import { Collidable, collidableType } from "./collidable.js";
 
 export const PEAK_WIDTH = 5;
@@ -14,6 +14,6 @@ export class TrailPeak extends Collidable {
 	constructor(h, ctx) {
 		super(collidableType.Peak, CANVAS_WIDTH, 0, h, PEAK_WIDTH, "blue", ctx);
 		this.limitsPlayerHeight = true;
-		this.staminaImpact = -10;
+		this.staminaImpact = STAMINA_HIT_PEAK;
 	}
 }

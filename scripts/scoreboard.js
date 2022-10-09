@@ -18,6 +18,9 @@ export class Scoreboard {
 		this.trailKarma = 50;
 		this.stamina = 100;
 
+		this.trashCollected = 0;
+		this.foodCollected = 0;
+
 		this.#wireUpEvents();
 	}
 
@@ -77,6 +80,9 @@ export class Scoreboard {
 		this.ctx.restore();
 	}
 
+	/**
+	 * @param {number} amount
+	 */
 	updateStamina(amount) {
 		this.stamina += amount;
 		this.stamina = Math.max(
@@ -85,6 +91,9 @@ export class Scoreboard {
 		);
 	}
 
+	/**
+	 * @param {number} amount
+	 */
 	updateKarma(amount) {
 		this.trailKarma += amount;
 		this.trailKarma = Math.max(
@@ -94,9 +103,23 @@ export class Scoreboard {
 	}
 
 	#wireUpEvents() {
-		window.addEventListener(EVENTS.karmaChange, (ev) => {});
+		window.addEventListener(
+			EVENTS.karmaChange,
+			(/** @type {CustomEventInit} */ e) => {
+				//console.log(EVENTS.karmaChange, e.detail);
+				this.updateKarma(e.detail);
+				this.trashCollected++;
+			}
+		);
 
-		window.addEventListener(EVENTS.staminaChange, (ev) => {});
+		window.addEventListener(
+			EVENTS.staminaChange,
+			(/** @type {CustomEventInit} */ e) => {
+				//console.log(EVENTS.staminaChange, e.detail);
+				this.updateStamina(e.detail);
+				this.foodCollected++;
+			}
+		);
 
 		window.addEventListener(
 			EVENTS.onTrail,

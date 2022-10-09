@@ -27,6 +27,7 @@ export class Collidable {
 		this.karmaImpact = 0;
 		this.staminaImpact = 0;
 		this.isCollectable = false;
+		this.isCollected = false;
 	}
 
 	update() {
@@ -43,4 +44,7 @@ export class Collidable {
 export const collidableType = {
 	Peak: 0,
 	Forest: 1,
+	Trash: 2,
+	TrashCan: 3,
+	Food: 4,
 };

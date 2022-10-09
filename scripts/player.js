@@ -1,27 +1,30 @@
 //@ts-check
-import { CANVAS_HEIGHT, EVENTS } from "./constants.js";
+import { CANVAS_HEIGHT, EVENTS, LOWEST_REACHABLE_POINT } from "./constants.js";
 import { game } from "./game.js";
 import { MIN_PEAK_HEIGHT } from "./obstacles/trail-peak.js";
 import { AngryDust } from "./particles/angry-dust.js";
 import { HappyDust } from "./particles/happy-dust.js";
+import { Scoreboard } from "./scoreboard.js";
 import { SpriteHelper } from "./utilities/sprite-helper.js";
 
 export class Player {
 	/**
 	 * @param {CanvasRenderingContext2D} ctx
+	 * @param {Scoreboard} scoreboard
 	 */
-	constructor(ctx) {
+	constructor(ctx, scoreboard) {
 		this.ctx = ctx;
+		this.scoreboard = scoreboard;
 
 		this.h = 32;
 		this.w = 32;
-
+	
 		this.x = 150;
 		this.y = CANVAS_HEIGHT / 2 + this.h / 2;
 
 		this.vy = 0; //  the current velocity of y
 		this.vyMax = 5;
-		this.maxY = CANVAS_HEIGHT - 25 - this.h;
+		this.maxY = LOWEST_REACHABLE_POINT - this.h;
 		this.minY = MIN_PEAK_HEIGHT;
 
 		this.dust = [];
@@ -86,8 +89,8 @@ export class Player {
 		if (this.vy > 0) {
 			this.vy = 0;
 		}
-
-		this.vy -= 2;
+		const staminaScaleFactor = this.scoreboard.stamina / 100;
+		this.vy -= 2 * staminaScaleFactor;
 	}
 
 	#wireUpEvents() {
