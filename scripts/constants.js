@@ -16,4 +16,7 @@ if (!ctx) throw "ctx is null or undefined!";
 export const EVENTS = {
 	onTrail: "fc_ontrail",
 	offTrail: "fc_offtrail",
+	karmaChange: "fc_karma",
+	staminaChange: "fc_stamina",
+	gameOver: "fc_gameover",
 };

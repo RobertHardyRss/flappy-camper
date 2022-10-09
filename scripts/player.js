@@ -1,7 +1,10 @@
 //@ts-check
 import { CANVAS_HEIGHT, EVENTS } from "./constants.js";
+import { game } from "./game.js";
 import { MIN_PEAK_HEIGHT } from "./obstacles/trail-peak.js";
+import { AngryDust } from "./particles/angry-dust.js";
 import { HappyDust } from "./particles/happy-dust.js";
+import { SpriteHelper } from "./utilities/sprite-helper.js";
 
 export class Player {
 	/**
@@ -23,38 +26,10 @@ export class Player {
 
 		this.dust = [];
 
-		this.image = {
-			/** @type {HTMLImageElement} */ //@ts-ignore
-			src: document.getElementById("player-run"),
-			fps: 15,
-			frames: [
-				{ x: 0, y: 0 },
-				{ x: 641, y: 0 },
-				{ x: 1282, y: 0 },
-				{ x: 0, y: 542 },
-				{ x: 641, y: 542 },
-				{ x: 1282, y: 542 },
-				{ x: 0, y: 1084 },
-				{ x: 641, y: 1084 },
-			],
-			currentFrame: 0,
-			lastFrameChange: 0,
-			xOffset: -33,
-			yOffset: -65,
-			next: function (/** @type {number} */ timeElapsed) {
-				this.lastFrameChange += timeElapsed;
-				if (this.lastFrameChange < 1000 / this.fps) return;
-				this.lastFrameChange = 0;
+		this.image = this.#setupImage();
+		this.#wireUpEvents();
 
-				this.currentFrame++;
-				if (this.currentFrame >= this.frames.length) {
-					this.currentFrame = 0;
-				}
-			},
-		};
-
-		this.wireUpEvents();
-		this.color = "red";
+		this.isOnTrail = true;
 	}
 
 	/**
@@ -65,7 +40,9 @@ export class Player {
 		this.y = Math.max(Math.min(this.y, this.maxY), this.minY);
 		this.vy += 0.1;
 
-		this.dust.push(new HappyDust(this));
+		this.dust.push(
+			this.isOnTrail ? new HappyDust(this) : new AngryDust(this)
+		);
 		this.dust.forEach((p) => {
 			p.update();
 		});
@@ -83,19 +60,21 @@ export class Player {
 	}
 
 	draw() {
+		// collision box
 		// this.ctx.fillStyle = "red";
 		// this.ctx.fillRect(this.x, this.y, this.w, this.h);
 
+		let currentFrame = this.image.getCurrentFrame();
 		this.ctx.drawImage(
 			this.image.src, // the image we want to draw
-			this.image.frames[this.image.currentFrame].x, // x coord of where to start our clip
-			this.image.frames[this.image.currentFrame].y, // y coord of where to start our clip
-			641, // x coord of where to end our clip
-			542, // y coord of where to end our clip
+			currentFrame.x, // x coord of where to start our clip
+			currentFrame.y, // y coord of where to start our clip
+			this.image.spriteWidth, // x coord of where to end our clip
+			this.image.spriteHeight, // y coord of where to end our clip
 			this.x + this.image.xOffset, // this the x coord of where to place the image
 			this.y + this.image.yOffset, // this the y coord of where to place the image
-			100, // the width of the image
-			100 // the height of the image
+			this.image.scaledWidth, // the width of the image
+			this.image.scaledHeight // the height of the image
 		);
 
 		this.dust.forEach((p) => {
@@ -111,7 +90,7 @@ export class Player {
 		this.vy -= 2;
 	}
 
-	wireUpEvents() {
+	#wireUpEvents() {
 		window.addEventListener("keydown", (ev) => {
 			// console.log(ev);
 
@@ -129,7 +108,7 @@ export class Player {
 			(/** @type {CustomEventInit} */ e) => {
 				// console.log("On trail", e);
 				this.minY = e.detail.lowestTopHeight - this.h;
-				this.color = "red";
+				this.isOnTrail = true;
 			}
 		);
 
@@ -138,8 +117,25 @@ export class Player {
 			(/** @type {CustomEventInit} */ e) => {
 				//console.log("Off Trail", e);
 				this.minY = e.detail.lowestTopHeight - this.h;
-				this.color = "black";
+				this.isOnTrail = false;
 			}
 		);
+	}
+
+	#setupImage() {
+		const image = new SpriteHelper(
+			document.getElementById("player-run"), // image
+			15, // fps
+			8, // frame count
+			3, // columns
+			3, // rows
+			641, // sprite width
+			542, // sprite height
+			100 // scale to width
+		);
+		image.xOffset = -30;
+		image.yOffset = -50;
+
+		return image;
 	}
 }
