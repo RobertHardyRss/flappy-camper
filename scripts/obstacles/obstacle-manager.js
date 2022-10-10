@@ -41,7 +41,7 @@ export class ObstacleManager {
 		this.nextTrashTime = 1000;
 		this.lastTrashTime = 0;
 		this.food = [];
-		this.nextFoodTime = 2000;
+		this.nextFoodTime = 5000;
 		this.lastFoodTime = 0;
 	}
 
@@ -72,7 +72,7 @@ export class ObstacleManager {
 	update(timeElapsed) {
 		[...this.peaks, ...this.forests, ...this.food, ...this.trash].forEach(
 			(b) => {
-				b.update();
+				b.update(timeElapsed);
 			}
 		);
 

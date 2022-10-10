@@ -30,7 +30,10 @@ export class Collidable {
 		this.isCollected = false;
 	}
 
-	update() {
+	/**
+	 * @param {number} timeElapsed
+	 */
+	update(timeElapsed) {
 		this.x = this.x - game.gameSpeed;
 		this.isVisible = this.x + this.w > 0;
 	}

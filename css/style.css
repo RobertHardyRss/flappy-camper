@@ -49,3 +49,7 @@ h1 {
 	animation: rainbow 5s infinite alternate-reverse;
 	font-family: Arial, Helvetica, sans-serif;
 }
+
+img.asset {
+	display: none;
+}

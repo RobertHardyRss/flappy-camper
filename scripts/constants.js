@@ -22,11 +22,11 @@ export const EVENTS = {
 	gameOver: "fc_gameover",
 };
 
-// Game scoreing contants
+// Game scoring contants
 export const KARMA_TRASH_BOOST = 10;
-export const KARMA_OFF_TRAIL = -10;
-export const KARMA_ON_TRAIL = 0.5;
+export const KARMA_OFF_TRAIL = -5;
+export const KARMA_ON_TRAIL = 0.2;
 export const STAMINA_FOOD_BOOST = 50;
 export const STAMINA_OFF_TRAIL = -1;
 export const STAMINA_HIT_PEAK = -10;
-export const STAMINA_ON_TRAIL = 0.5;
+export const STAMINA_ON_TRAIL = 0.1;
