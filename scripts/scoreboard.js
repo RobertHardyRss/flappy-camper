@@ -1,6 +1,6 @@
 //@ts-check
 
-import { CANVAS_HEIGHT, CANVAS_WIDTH, EVENTS } from "./constants.js";
+import { CANVAS_WIDTH, EVENTS } from "./constants.js";
 import { game } from "./game.js";
 
 const MIN_STAMINA = 0;
