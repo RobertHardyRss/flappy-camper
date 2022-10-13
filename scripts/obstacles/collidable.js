@@ -28,6 +28,8 @@ export class Collidable {
 		this.staminaImpact = 0;
 		this.isCollectable = false;
 		this.isCollected = false;
+		this.isTaggable = false;
+		this.isTagged = false;
 	}
 
 	/**

@@ -1,4 +1,5 @@
 //@ts-check
+import { PathBackground } from "./background-images/path-background.js";
 import { CollisionManager } from "./collision-manager.js";
 import { ctx, CANVAS_HEIGHT, CANVAS_WIDTH } from "./constants.js";
 import { ObstacleManager } from "./obstacles/obstacle-manager.js";
@@ -8,6 +9,7 @@ import { Scoreboard } from "./scoreboard.js";
 let manager = new ObstacleManager(ctx);
 manager.init();
 
+let path = new PathBackground(ctx);
 let score = new Scoreboard(ctx);
 let p = new Player(ctx, score);
 let collisions = new CollisionManager(p, manager);
@@ -23,11 +25,13 @@ function gameLoop(timestamp) {
 	// clear the screen
 	ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
+	path.update();
 	manager.update(timeElapsed);
 	p.update(timeElapsed);
 	collisions.update(timeElapsed);
 	score.update(timeElapsed);
 
+	path.draw();
 	manager.draw();
 	p.draw();
 	score.draw();

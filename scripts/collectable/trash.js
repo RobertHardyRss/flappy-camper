@@ -3,7 +3,7 @@ import { CANVAS_WIDTH, KARMA_TRASH_BOOST } from "../constants.js";
 import { Collidable, collidableType } from "../obstacles/collidable.js";
 import { TrashDust } from "../particles/trash-dust.js";
 
-const TRASH_SIZE = 64;
+const TRASH_SIZE = 50;
 let trashImages;
 await fetch("../../images/trash.json")
 	.then((response) => response.json())
@@ -28,6 +28,8 @@ export class Trash extends Collidable {
 			ctx
 		);
 		this.isCollectable = true;
+		this.isTaggable = true;
+
 		this.karmaImpact = KARMA_TRASH_BOOST;
 		this.randomImage =
 			trashImages.frames[
@@ -65,16 +67,27 @@ export class Trash extends Collidable {
 		super.update(timeElapsed);
 
 		this.lastParticle += timeElapsed;
-		if (this.lastParticle >= this.particlesSpawnTime) {
+
+		if (this.lastParticle >= this.particlesSpawnTime && !this.isTagged) {
 			this.particles.push(new TrashDust(this));
 			this.lastParticle = 0;
 		}
+
 		this.particles.forEach((p) => p.update());
 	}
 
 	draw() {
 		// super.draw();
 		this.particles.forEach((p) => p.draw());
+		this.ctx.save();
+
+		if (this.isTagged) {
+			this.ctx.shadowOffsetX = 0;
+			this.ctx.shadowOffsetY = 0;
+			this.ctx.shadowBlur = 20;
+			this.ctx.shadowColor = "yellow";
+		}
+
 		this.ctx.drawImage(
 			this.image, // the image we want to draw
 			this.randomImage.frame.x, // x coord of where to start our clip
@@ -86,5 +99,7 @@ export class Trash extends Collidable {
 			this.scaledWidth, // the width of the image
 			this.scaledHeight // the height of the image
 		);
+
+		this.ctx.restore();
 	}
 }

@@ -1,6 +1,6 @@
 //@ts-check
 
-import { CANVAS_WIDTH, EVENTS } from "./constants.js";
+import { CANVAS_HEIGHT, CANVAS_WIDTH, EVENTS } from "./constants.js";
 import { game } from "./game.js";
 
 const MIN_STAMINA = 0;
@@ -21,11 +21,37 @@ export class Scoreboard {
 		this.trashCollected = 0;
 		this.foodCollected = 0;
 
+		this.karmaMeter = {
+			x: 10,
+			y: 10,
+			w: 300,
+			h: 25,
+		};
+		this.karmaGradient = this.#getKarmaGradient();
+
+		this.staminaMeter = {
+			x: CANVAS_WIDTH - 10 - 300,
+			y: 10,
+			w: 300,
+			h: 25,
+		};
+		this.staminaGradient = this.#getStaminaGradient();
+
+		this.gameSpeedIncreaseInterval = CANVAS_WIDTH * 4 * 2;
+		this.lastGameSpeedIncrease = 0;
+
 		this.#wireUpEvents();
 	}
 
 	update(timeElapsed) {
 		this.xDistance += game.gameSpeed;
+		this.lastGameSpeedIncrease += game.gameSpeed;
+
+		if (this.lastGameSpeedIncrease >= this.gameSpeedIncreaseInterval) {
+			this.lastGameSpeedIncrease = 0;
+			let event = new Event(EVENTS.increaseGameSpeed);
+			window.dispatchEvent(event);
+		}
 	}
 
 	draw() {
@@ -35,14 +61,16 @@ export class Scoreboard {
 	}
 
 	#drawDistanceTraveled() {
-		const distance = `${this.#getDistanceTraveled()} miles`;
-		const x = CANVAS_WIDTH - 20;
-		const y = 40;
 		this.ctx.save();
+		this.ctx.globalAlpha = 0.8;
+		const distance = `${this.#getDistanceTraveled()} MILES`;
+		const fontHeight = 20;
+		const x = CANVAS_WIDTH / 2;
+		const y = fontHeight + 10;
 		this.ctx.strokeStyle = "black";
 		this.ctx.fillStyle = "white";
-		this.ctx.textAlign = "right";
-		this.ctx.font = "20px fantasy";
+		this.ctx.textAlign = "center";
+		this.ctx.font = `${fontHeight}px fantasy`;
 		this.ctx.strokeText(distance, x, y);
 		this.ctx.fillText(distance, x, y);
 		this.ctx.restore();
@@ -52,31 +80,96 @@ export class Scoreboard {
 		return (this.xDistance / (CANVAS_WIDTH * 4)).toFixed(2);
 	}
 
+	#getKarmaGradient() {
+		let gradient = this.ctx.createLinearGradient(
+			this.karmaMeter.x,
+			0,
+			this.karmaMeter.w,
+			0
+		);
+		gradient.addColorStop(0, "red");
+		gradient.addColorStop(0.5, "yellow");
+		gradient.addColorStop(1, "green");
+		return gradient;
+	}
+
+	#getStaminaGradient() {
+		let gradient = this.ctx.createLinearGradient(
+			this.staminaMeter.x,
+			0,
+			this.staminaMeter.w + this.staminaMeter.x,
+			0
+		);
+		gradient.addColorStop(0, "red");
+		gradient.addColorStop(0.25, "purple");
+		gradient.addColorStop(1, "purple");
+		return gradient;
+	}
+
 	#drawKarma() {
-		const distance = `${this.trailKarma} trail karma`;
-		const x = CANVAS_WIDTH - 20;
-		const y = 60;
 		this.ctx.save();
+		this.ctx.fillStyle = "silver";
+
+		this.ctx.fillRect(
+			this.karmaMeter.x,
+			this.karmaMeter.y,
+			this.karmaMeter.w,
+			this.karmaMeter.h
+		);
+
+		this.ctx.fillStyle = this.karmaGradient;
+		this.ctx.fillRect(
+			this.karmaMeter.x,
+			this.karmaMeter.y,
+			this.karmaMeter.w * (this.trailKarma / 100),
+			this.karmaMeter.h
+		);
+
+		this.ctx.globalAlpha = 0.7;
+		const text = `TRAIL KARMA: ${this.trailKarma.toFixed(0)}`;
+		const fontHeight = 20;
+		const x = this.karmaMeter.x + this.karmaMeter.w / 2;
+		const y = this.karmaMeter.y + fontHeight;
 		this.ctx.strokeStyle = "black";
 		this.ctx.fillStyle = "white";
-		this.ctx.textAlign = "right";
-		this.ctx.font = "20px fantasy";
-		this.ctx.strokeText(distance, x, y);
-		this.ctx.fillText(distance, x, y);
+		this.ctx.textAlign = "center";
+		this.ctx.font = `${fontHeight}px fantasy`;
+		this.ctx.strokeText(text, x, y);
+		this.ctx.fillText(text, x, y);
+
 		this.ctx.restore();
 	}
 
 	#drawStamina() {
-		const distance = `${this.stamina} stamina`;
-		const x = CANVAS_WIDTH - 20;
-		const y = 80;
 		this.ctx.save();
+		this.ctx.fillStyle = "silver";
+		this.ctx.fillRect(
+			this.staminaMeter.x,
+			this.staminaMeter.y,
+			this.staminaMeter.w,
+			this.staminaMeter.h
+		);
+
+		this.ctx.fillStyle = this.staminaGradient;
+		this.ctx.fillRect(
+			this.staminaMeter.x,
+			this.staminaMeter.y,
+			this.staminaMeter.w * (this.stamina / 100),
+			this.staminaMeter.h
+		);
+
+		this.ctx.globalAlpha = 0.7;
+		const staminaText = `STAMINA: ${this.stamina.toFixed(0)}`;
+		const fontHeight = 20;
+		const x = this.staminaMeter.x + this.staminaMeter.w / 2;
+		const y = this.staminaMeter.y + fontHeight;
 		this.ctx.strokeStyle = "black";
 		this.ctx.fillStyle = "white";
-		this.ctx.textAlign = "right";
-		this.ctx.font = "20px fantasy";
-		this.ctx.strokeText(distance, x, y);
-		this.ctx.fillText(distance, x, y);
+		this.ctx.textAlign = "center";
+		this.ctx.font = `${fontHeight}px fantasy`;
+		this.ctx.strokeText(staminaText, x, y);
+		this.ctx.fillText(staminaText, x, y);
+
 		this.ctx.restore();
 	}
 

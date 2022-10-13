@@ -1,5 +1,11 @@
 //@ts-check
-import { CANVAS_WIDTH, LOWEST_REACHABLE_POINT } from "../constants.js";
+import {
+	canvas,
+	CANVAS_WIDTH,
+	EVENTS,
+	KARMA_MISSED_TRASH_PENALTY,
+	LOWEST_REACHABLE_POINT,
+} from "../constants.js";
 import {
 	MAX_PEAK_HEIGHT,
 	MIN_PEAK_HEIGHT,
@@ -64,6 +70,34 @@ export class ObstacleManager {
 			this.forests.push(o);
 			currentX += o.w;
 		}
+
+		canvas.addEventListener("click", (ev) => {
+			// console.log(ev);
+			const x = ev.offsetX;
+			const y = ev.offsetY;
+			const buffer = 20;
+			this.trash.forEach((t) => {
+				if (
+					x >= t.x - buffer &&
+					x <= t.x + t.w + buffer &&
+					y >= t.y - buffer &&
+					y <= t.y + t.h + buffer
+				) {
+					t.isTagged = true;
+					console.log("trash tagged!");
+				} else {
+					console.log(
+						"trash missed!",
+						x,
+						y,
+						t.x,
+						t.y,
+						t.x + t.w,
+						t.y + t.h
+					);
+				}
+			});
+		});
 	}
 
 	/**
@@ -86,6 +120,17 @@ export class ObstacleManager {
 	 * @param {number} timeElapsed
 	 */
 	updateTrash(timeElapsed) {
+		this.trash
+			.filter((o) => !o.isVisible && !o.isCollected && !o.isTagged)
+			.forEach((t) => {
+				// send a missed trash karma penalty for
+				// every piece of trash that is not tagged and is
+				// off screen
+				let event = new CustomEvent(EVENTS.karmaChange, {
+					detail: KARMA_MISSED_TRASH_PENALTY,
+				});
+				window.dispatchEvent(event);
+			});
 		this.trash = this.trash.filter((o) => o.isVisible && !o.isCollected);
 
 		this.lastTrashTime += timeElapsed;
