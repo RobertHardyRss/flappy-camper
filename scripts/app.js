@@ -8,6 +8,7 @@ import {
 	EVENTS,
 	canvas,
 } from "./constants.js";
+import { game } from "./game.js";
 import { ObstacleManager } from "./obstacles/obstacle-manager.js";
 import { Player } from "./player.js";
 import { GameOverScene } from "./scenes/game-over.js";
@@ -59,8 +60,9 @@ window.addEventListener(EVENTS.startGame, () => {
 	requestAnimationFrame(gameLoop);
 });
 
-
 window.addEventListener(EVENTS.restartGame, () => {
+	game.reset();
+
 	manager = new ObstacleManager(ctx);
 	manager.init();
 
