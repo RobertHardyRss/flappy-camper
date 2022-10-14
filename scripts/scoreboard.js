@@ -1,6 +1,6 @@
 //@ts-check
 
-import { CANVAS_WIDTH, EVENTS } from "./constants.js";
+import { CANVAS_WIDTH, EVENTS, KARMA_TRASH_BOOST } from "./constants.js";
 import { game } from "./game.js";
 
 const MIN_STAMINA = 0;
@@ -63,21 +63,29 @@ export class Scoreboard {
 	#drawDistanceTraveled() {
 		this.ctx.save();
 		this.ctx.globalAlpha = 0.8;
-		const distance = `${this.#getDistanceTraveled()} MILES`;
+		const distance = `${this.getDistanceTraveled()} MILES`;
 		const fontHeight = 20;
 		const x = CANVAS_WIDTH / 2;
 		const y = fontHeight + 10;
 		this.ctx.strokeStyle = "black";
 		this.ctx.fillStyle = "white";
 		this.ctx.textAlign = "center";
-		this.ctx.font = `${fontHeight}px fantasy`;
+		this.ctx.font = `${fontHeight}px rocko`;
 		this.ctx.strokeText(distance, x, y);
 		this.ctx.fillText(distance, x, y);
 		this.ctx.restore();
 	}
 
-	#getDistanceTraveled() {
+	getDistanceTraveled() {
 		return (this.xDistance / (CANVAS_WIDTH * 4)).toFixed(2);
+	}
+
+	getTotalScore() {
+		let score = (
+			(this.foodCollected + +this.getDistanceTraveled()) *
+			(this.trashCollected * KARMA_TRASH_BOOST)
+		).toFixed(0);
+		return score;
 	}
 
 	#getKarmaGradient() {
@@ -133,7 +141,7 @@ export class Scoreboard {
 		this.ctx.strokeStyle = "black";
 		this.ctx.fillStyle = "white";
 		this.ctx.textAlign = "center";
-		this.ctx.font = `${fontHeight}px fantasy`;
+		this.ctx.font = `${fontHeight}px rocko`;
 		this.ctx.strokeText(text, x, y);
 		this.ctx.fillText(text, x, y);
 
@@ -166,7 +174,7 @@ export class Scoreboard {
 		this.ctx.strokeStyle = "black";
 		this.ctx.fillStyle = "white";
 		this.ctx.textAlign = "center";
-		this.ctx.font = `${fontHeight}px fantasy`;
+		this.ctx.font = `${fontHeight}px rocko`;
 		this.ctx.strokeText(staminaText, x, y);
 		this.ctx.fillText(staminaText, x, y);
 

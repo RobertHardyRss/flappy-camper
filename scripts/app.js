@@ -1,9 +1,17 @@
 //@ts-check
 import { PathBackground } from "./background-images/path-background.js";
 import { CollisionManager } from "./collision-manager.js";
-import { ctx, CANVAS_HEIGHT, CANVAS_WIDTH } from "./constants.js";
+import {
+	ctx,
+	CANVAS_HEIGHT,
+	CANVAS_WIDTH,
+	EVENTS,
+	canvas,
+} from "./constants.js";
 import { ObstacleManager } from "./obstacles/obstacle-manager.js";
 import { Player } from "./player.js";
+import { GameOverScene } from "./scenes/game-over.js";
+import { StartScene } from "./scenes/start.js";
 import { Scoreboard } from "./scoreboard.js";
 
 let manager = new ObstacleManager(ctx);
@@ -13,6 +21,9 @@ let path = new PathBackground(ctx);
 let score = new Scoreboard(ctx);
 let p = new Player(ctx, score);
 let collisions = new CollisionManager(p, manager);
+
+let start = new StartScene(ctx);
+start.draw();
 
 let currentTime = 0;
 /**
@@ -38,7 +49,25 @@ function gameLoop(timestamp) {
 
 	if (score.trailKarma > 0) {
 		requestAnimationFrame(gameLoop);
+	} else {
+		let gameOver = new GameOverScene(ctx, score);
+		gameOver.draw();
 	}
 }
 
-requestAnimationFrame(gameLoop);
+window.addEventListener(EVENTS.startGame, () => {
+	requestAnimationFrame(gameLoop);
+});
+
+
+window.addEventListener(EVENTS.restartGame, () => {
+	manager = new ObstacleManager(ctx);
+	manager.init();
+
+	path = new PathBackground(ctx);
+	score = new Scoreboard(ctx);
+	p = new Player(ctx, score);
+	collisions = new CollisionManager(p, manager);
+
+	requestAnimationFrame(gameLoop);
+});

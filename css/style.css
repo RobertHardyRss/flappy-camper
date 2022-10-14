@@ -47,9 +47,23 @@ h1 {
 	color: purple;
 	font-size: 30pt;
 	animation: rainbow 5s infinite alternate-reverse;
-	font-family: Arial, Helvetica, sans-serif;
+	font-family: driftwood, Arial, Helvetica, sans-serif;
 }
 
 img.asset {
 	display: none;
+}
+
+a {
+	font-family: rocko;
+}
+
+@font-face {
+	font-family: driftwood;
+	src: url("../fonts/DriftWood.ttf");
+}
+
+@font-face {
+	font-family: rocko;
+	src: url("../fonts/RockoFLF.ttf");
 }

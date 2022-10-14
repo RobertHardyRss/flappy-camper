@@ -21,6 +21,8 @@ export const EVENTS = {
 	staminaChange: "fc_stamina",
 	gameOver: "fc_gameover",
 	increaseGameSpeed: "fc_faster",
+	startGame: "fc_start",
+	restartGame: "fc_restart",
 };
 
 // Game scoring contants

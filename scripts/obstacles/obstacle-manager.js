@@ -47,7 +47,7 @@ export class ObstacleManager {
 		this.nextTrashTime = 1000;
 		this.lastTrashTime = 0;
 		this.food = [];
-		this.nextFoodTime = 5000;
+		this.nextFoodTime = 3000;
 		this.lastFoodTime = 0;
 	}
 
