@@ -11,7 +11,7 @@ await fetch("../../images/trash.json")
 		trashImages = json;
 	});
 
-console.log(trashImages);
+// console.log(trashImages);
 
 export class Trash extends Collidable {
 	/**
