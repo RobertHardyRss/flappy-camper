@@ -5,7 +5,7 @@ import { TrashDust } from "../particles/trash-dust.js";
 
 const TRASH_SIZE = 50;
 let trashImages;
-await fetch("../../images/trash.json")
+await fetch("images/trash.json")
 	.then((response) => response.json())
 	.then((json) => {
 		trashImages = json;

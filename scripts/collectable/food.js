@@ -4,7 +4,7 @@ import { Collidable, collidableType } from "../obstacles/collidable.js";
 
 const FOOD_SIZE = 32;
 let foodImages;
-await fetch("../../images/food.json")
+await fetch("images/food.json")
 	.then((response) => response.json())
 	.then((json) => {
 		foodImages = json;
